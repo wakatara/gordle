@@ -73,6 +73,56 @@ func (g Game) Update() error {
 		edge = true
 	}
 
+	if edge == true && (repeatingKeyPressed(ebiten.KeyEnter) || repeatingKeyPressed(ebiten.KeyNumpadEnter)) && grid[loc] != "" {
+		inp := ""
+		for i := (loc - (cols - 1)); i < (loc + 1); i++ {
+			inp += grid[i]
+		}
+		validWord := false
+		for _, w := range dict {
+			if w == inp {
+				validWord = true
+			}
+		}
+		if validWord {
+			var checkWord [cols]bool
+			for i, letter := range inp {
+				for j, ans := range answer {
+					if i == j && string(letter) == string(ans) {
+						check[loc-cols+i+1] = 1
+					} else {
+						check[loc-cols+i+1] = 3
+					}
+				}
+			}
+			for i, letter := range inp {
+				if strings.Contains(answer, string(letter)) {
+					found := false
+					for j, ans := range answer {
+						if found == false && checkWord[j] == false {
+							if string(letter) == string(ans) {
+								checkWord[j] = true
+								found = true
+								check[loc-cols+i+1] = 2
+							}
+						}
+					}
+				}
+			}
+			if inp == answer {
+				won = true
+			}
+			loc++
+			edge = false
+		}
+	}
+	if loc < 0 {
+		loc = 0
+	}
+	if loc > rows*cols {
+		loc = rows*cols - 1
+	}
+
 	return nil
 }
 
@@ -93,7 +143,14 @@ func repeatingKeyPressed(key ebiten.Key) bool {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(bkg)
-	// TODO if won {}
+	if won {
+		winner := "Good job!"
+		for i := 0; i < len(winner); i++ {
+			msg := fmt.Sprintf(strings.ToUpper(string([]rune(winner)[i])))
+			fontColor = color.Black
+			text.Draw(screen, msg, mplusNormalFont, i*85+40, rows*85+55, fontColor)
+		}
+	}
 	for w := 0; w < cols; w++ {
 		for h := 0; h < rows; h++ {
 			rect := ebiten.NewImage(75, 75)
@@ -106,7 +163,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				if check[w+(h*cols)] == 2 {
 					rect.Fill(yellow)
 				}
-				if check[w+(h*cols)] == 1 {
+				if check[w+(h*cols)] == 3 {
 					rect.Fill(grey)
 				}
 				fontColor = color.White
@@ -128,6 +185,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				msg := fmt.Sprintf(strings.ToUpper(grid[w+(h*cols)]))
 				text.Draw(screen, msg, mplusNormalFont, w*85+38, h*85+55, fontColor)
 			}
+		}
+	}
+	if !won && check[len(check)-1] != 0 {
+		for i := 0; i < len(answer); i++ {
+			msg := fmt.Sprintf(strings.ToUpper(string([]rune(answer)[i])))
+			fontColor = color.Black
+			text.Draw(screen, msg, mplusNormalFont, i*85+38, rows*85+55, fontColor)
 		}
 	}
 }
