@@ -100,7 +100,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				rect.Fill(grey)
 			}
 			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Translate(float64(w*85+10), float64(h*85+10))
+			op.GeoM.Translate(float64(w*85+10)+1, float64(h*85+10)+1)
 			screen.DrawImage(rect, op)
 			if check[w+(h*cols)] == 0 {
 				rect2 := ebiten.NewImage(73, 73)
