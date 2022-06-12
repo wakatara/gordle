@@ -3,7 +3,6 @@ module github.com/wakatara/gordle
 go 1.18
 
 require (
-	github.com/hajimehoshi/ebiten v1.12.12
 	github.com/hajimehoshi/ebiten/v2 v2.3.4
 	golang.org/x/image v0.0.0-20220601225756-64ec528b34cd
 )
