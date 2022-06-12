@@ -58,6 +58,21 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (g Game) Update() error {
+	if !won {
+		g.runes = ebiten.AppendInputChars(g.runes[:0])
+		if strings.Contains(alphabet, string(g.runes)) && string(g.runes) != "" && loc >= 0 && loc < rows*cols {
+			grid[loc] = string(g.runes[0:1])
+			if !edge {
+				loc++
+			}
+		}
+	}
+	edge = false
+
+	if (loc+2)%cols == 1 && loc != 0 {
+		edge = true
+	}
+
 	return nil
 }
 
