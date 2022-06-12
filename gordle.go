@@ -73,7 +73,7 @@ func (g Game) Update() error {
 		edge = true
 	}
 
-	if edge == true && (repeatingKeyPressed(ebiten.KeyEnter) || repeatingKeyPressed(ebiten.KeyNumpadEnter)) && grid[loc] != "" {
+	if edge && (repeatingKeyPressed(ebiten.KeyEnter) || repeatingKeyPressed(ebiten.KeyNumpadEnter)) && grid[loc] != "" {
 		inp := ""
 		for i := (loc - (cols - 1)); i < (loc + 1); i++ {
 			inp += grid[i]
@@ -90,7 +90,8 @@ func (g Game) Update() error {
 				for j, ans := range answer {
 					if i == j && string(letter) == string(ans) {
 						check[loc-cols+i+1] = 1
-					} else {
+						checkWord[i] = true
+					} else if i == j {
 						check[loc-cols+i+1] = 3
 					}
 				}
@@ -99,7 +100,7 @@ func (g Game) Update() error {
 				if strings.Contains(answer, string(letter)) {
 					found := false
 					for j, ans := range answer {
-						if found == false && checkWord[j] == false {
+						if !found && !checkWord[j] && check[loc-cols+i+1] != 1 {
 							if string(letter) == string(ans) {
 								checkWord[j] = true
 								found = true
@@ -116,6 +117,14 @@ func (g Game) Update() error {
 			edge = false
 		}
 	}
+
+	if repeatingKeyPressed(ebiten.KeyBackspace) && loc > 0 {
+		if check[loc-1] == 0 {
+			grid[loc] = ""
+			loc--
+		}
+	}
+
 	if loc < 0 {
 		loc = 0
 	}
@@ -135,7 +144,7 @@ func repeatingKeyPressed(key ebiten.Key) bool {
 	if d == 1 {
 		return true
 	}
-	if d >= delay && (d-delay)&interval == 0 {
+	if d >= delay && (d-delay)%interval == 0 {
 		return true
 	}
 	return false
@@ -148,7 +157,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		for i := 0; i < len(winner); i++ {
 			msg := fmt.Sprintf(strings.ToUpper(string([]rune(winner)[i])))
 			fontColor = color.Black
-			text.Draw(screen, msg, mplusNormalFont, i*85+40, rows*85+55, fontColor)
+			text.Draw(screen, msg, mplusNormalFont, i*40+50, rows*85+55, fontColor)
 		}
 	}
 	for w := 0; w < cols; w++ {
@@ -220,7 +229,7 @@ func main() {
 	}
 	rand.Seed(time.Now().UnixNano())
 	answer = dict[rand.Intn(len(dict))]
-	fmt.Printf(answer)
+	// fmt.Printf(answer)
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
